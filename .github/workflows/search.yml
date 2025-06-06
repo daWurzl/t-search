@@ -1,0 +1,114 @@
+# GitHub Actions Workflow für die API-Suche
+# Wird manuell oder über die Webseite ausgelöst
+name: Public Tender Search
+
+on:
+  workflow_dispatch:
+    inputs:
+      search_term:
+        description: 'Suchbegriff für die Ausschreibungen'
+        required: true
+        type: string
+      apis:
+        description: 'Komma-getrennte Liste der zu verwendenden APIs (ted,openopps,sam,contracts_finder)'
+        required: true
+        default: 'ted,openopps,sam,contracts_finder'
+        type: string
+      date_from:
+        description: 'Startdatum für die Suche (YYYY-MM-DD)'
+        required: false
+        type: string
+      date_to:
+        description: 'Enddatum für die Suche (YYYY-MM-DD)'
+        required: false
+        type: string
+      min_value:
+        description: 'Mindestauftragswert in EUR'
+        required: false
+        default: '0'
+        type: string
+
+jobs:
+  search:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    
+    steps:
+    # Repository auschecken
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+      
+    # Python-Umgebung einrichten
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        cache: 'pip'
+    
+    # Abhängigkeiten installieren
+    - name: Install Dependencies
+      run: |
+        pip install --upgrade pip
+        pip install -r requirements.txt
+    
+    # API-Suche durchführen
+    - name: Execute API Search
+      env:
+        # API-Schlüssel und Credentials als GitHub Secrets
+        TED_API_KEY: ${{ secrets.TED_API_KEY }}
+        OPENOPPS_USERNAME: ${{ secrets.OPENOPPS_USERNAME }}
+        OPENOPPS_PASSWORD: ${{ secrets.OPENOPPS_PASSWORD }}
+        SAM_GOV_API_KEY: ${{ secrets.SAM_GOV_API_KEY }}
+        # Suchparameter aus Input übernehmen
+        SEARCH_TERM: ${{ github.event.inputs.search_term }}
+        APIS: ${{ github.event.inputs.apis }}
+        DATE_FROM: ${{ github.event.inputs.date_from }}
+        DATE_TO: ${{ github.event.inputs.date_to }}
+        MIN_VALUE: ${{ github.event.inputs.min_value }}
+      run: |
+        echo "Starte API-Suche mit folgenden Parametern:"
+        echo "Suchbegriff: $SEARCH_TERM"
+        echo "APIs: $APIS"
+        echo "Zeitraum: $DATE_FROM bis $DATE_TO"
+        echo "Mindestauftragswert: $MIN_VALUE EUR"
+        
+        # Python-Suchskript ausführen
+        python scripts/api_search.py
+    
+    # Ergebnisse als Artefakt hochladen
+    - name: Upload Search Results
+      uses: actions/upload-artifact@v3
+      with:
+        name: search-results
+        path: |
+          results/
+          !results/.gitkeep
+        retention-days: 30
+    
+    # Zusammenfassung der Ergebnisse anzeigen
+    - name: Display Results Summary
+      run: |
+        echo "## Suchergebnis-Zusammenfassung" >> $GITHUB_STEP_SUMMARY
+        python scripts/generate_summary.py >> $GITHUB_STEP_SUMMARY
+    
+    # Bei Fehlern: Debug-Informationen sammeln
+    - name: Collect Debug Info on Failure
+      if: failure()
+      run: |
+        echo "## Debug-Informationen" >> $GITHUB_STEP_SUMMARY
+        echo "Workflow fehlgeschlagen. Prüfen Sie die Logs für Details." >> $GITHUB_STEP_SUMMARY
+        
+        # Log-Dateien als Artefakt hochladen falls vorhanden
+        if [ -d "logs/" ]; then
+          echo "Log-Dateien gefunden, werden hochgeladen..."
+        fi
+      continue-on-error: true
+    
+    - name: Upload Debug Logs
+      if: failure()
+      uses: actions/upload-artifact@v3
+      with:
+        name: debug-logs
+        path: logs/
+        retention-days: 7
+      continue-on-error: true
