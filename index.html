@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Öffentliche Ausschreibungen - Multi-API Suche</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Header Section -->
+    <header class="header">
+        <div class="container">
+            <h1><i class="fas fa-search"></i> Öffentliche Ausschreibungen</h1>
+            <p>Multi-API Suche für EU, UK und US Aufträge</p>
+        </div>
+    </header>
+
+    <!-- Search Section -->
+    <section class="search-section">
+        <div class="container">
+            <div class="search-card">
+                <h2>Neue Suche starten</h2>
+                
+                <!-- Search Form -->
+                <form id="searchForm" class="search-form">
+                    <!-- Suchbegriff Input -->
+                    <div class="form-group">
+                        <label for="searchTerm">Suchbegriff:</label>
+                        <input type="text" id="searchTerm" name="searchTerm" required 
+                               placeholder="z.B. IT-Services, Bauarbeiten, Consulting...">
+                    </div>
+
+                    <!-- API Auswahl mit Checkboxen -->
+                    <div class="form-group">
+                        <label>APIs auswählen:</label>
+                        <div class="checkbox-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="apis" value="ted" checked>
+                                <span class="checkmark"></span>
+                                TED-API (EU)
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="apis" value="openopps" checked>
+                                <span class="checkmark"></span>
+                                OpenOpps (Multi-national)
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="apis" value="sam" checked>
+                                <span class="checkmark"></span>
+                                SAM.gov (US)
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="apis" value="contracts_finder" checked>
+                                <span class="checkmark"></span>
+                                Contracts Finder (UK)
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Erweiterte Filter -->
+                    <div class="form-group">
+                        <label for="dateFrom">Von Datum:</label>
+                        <input type="date" id="dateFrom" name="dateFrom">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="dateTo">Bis Datum:</label>
+                        <input type="date" id="dateTo" name="dateTo">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="minValue">Mindestauftragswert (EUR):</label>
+                        <input type="number" id="minValue" name="minValue" min="0" step="1000">
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button type="submit" class="search-btn">
+                        <i class="fas fa-search"></i> Suche starten
+                    </button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- Status Section -->
+    <section class="status-section" id="statusSection" style="display: none;">
+        <div class="container">
+            <div class="status-card">
+                <h3>Suchstatus</h3>
+                <div id="statusMessage" class="status-message">
+                    <i class="fas fa-spinner fa-spin"></i> Suche wird durchgeführt...
+                </div>
+                <div id="progressBar" class="progress-bar">
+                    <div class="progress-fill" style="width: 0%"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Results Section -->
+    <section class="results-section" id="resultsSection" style="display: none;">
+        <div class="container">
+            <div class="results-header">
+                <h2 id="resultsTitle">Suchergebnisse</h2>
+                <div class="results-actions">
+                    <button id="exportCsvBtn" class="export-btn">
+                        <i class="fas fa-download"></i> Als CSV exportieren
+                    </button>
+                    <button id="refreshBtn" class="refresh-btn">
+                        <i class="fas fa-sync-alt"></i> Ergebnisse aktualisieren
+                    </button>
+                </div>
+            </div>
+
+            <!-- Statistics Cards -->
+            <div class="stats-grid" id="statsGrid">
+                <!-- Wird dynamisch befüllt -->
+            </div>
+
+            <!-- Filter Section für Ergebnisse -->
+            <div class="results-filter">
+                <label for="apiFilter">Nach API filtern:</label>
+                <select id="apiFilter">
+                    <option value="">Alle APIs</option>
+                    <option value="ted">TED-API (EU)</option>
+                    <option value="openopps">OpenOpps</option>
+                    <option value="sam">SAM.gov</option>
+                    <option value="contracts_finder">Contracts Finder</option>
+                </select>
+
+                <label for="sortBy">Sortieren nach:</label>
+                <select id="sortBy">
+                    <option value="date">Datum (neueste zuerst)</option>
+                    <option value="value">Auftragswert</option>
+                    <option value="title">Titel</option>
+                    <option value="deadline">Einreichungsfrist</option>
+                </select>
+            </div>
+
+            <!-- Results Table -->
+            <div class="results-table-container">
+                <table id="resultsTable" class="results-table">
+                    <thead>
+                        <tr>
+                            <th>API</th>
+                            <th>Titel</th>
+                            <th>Organisation</th>
+                            <th>Auftragswert</th>
+                            <th>Veröffentlichung</th>
+                            <th>Einreichungsfrist</th>
+                            <th>Land</th>
+                            <th>Aktionen</th>
+                        </tr>
+                    </thead>
+                    <tbody id="resultsTableBody">
+                        <!-- Wird dynamisch befüllt -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            <div class="pagination" id="pagination">
+                <!-- Wird dynamisch befüllt -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2025 Öffentliche Ausschreibungen Suche. Datenquellen: TED, OpenOpps, SAM.gov, Contracts Finder</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
