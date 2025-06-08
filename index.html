@@ -3,176 +3,325 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Öffentliche Ausschreibungen - Multi-API Suche</title>
-    <link rel="stylesheet" href="styles.css">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <title>Öffentliche Ausschreibungen – Multi-API Suche</title>
+    <!-- Einfache, moderne Styles -->
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #f4f6fa;
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            background: linear-gradient(90deg, #1e3c72 0%, #2a5298 100%);
+            color: #fff;
+            padding: 2rem 1rem 1rem 1rem;
+            text-align: center;
+        }
+        main {
+            max-width: 900px;
+            margin: 2rem auto;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(30,60,114,0.07);
+            padding: 2rem;
+        }
+        h1 {
+            margin-bottom: 0.5rem;
+        }
+        .search-form {
+            display: grid;
+            gap: 1.2rem;
+            margin-bottom: 2rem;
+        }
+        .form-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        .form-group {
+            flex: 1 1 200px;
+            min-width: 200px;
+        }
+        label {
+            font-weight: 600;
+            margin-bottom: 0.2rem;
+            display: block;
+        }
+        input[type="text"], input[type="date"], input[type="number"], select {
+            width: 100%;
+            padding: 0.7rem;
+            border: 1.5px solid #dde2ec;
+            border-radius: 5px;
+            font-size: 1rem;
+            margin-top: 0.2rem;
+        }
+        .checkbox-group {
+            display: flex;
+            gap: 2rem;
+            margin-top: 0.5rem;
+        }
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            font-weight: 500;
+        }
+        .checkbox-label input[type="checkbox"] {
+            margin-right: 0.5rem;
+        }
+        .search-btn {
+            background: linear-gradient(90deg, #1e3c72 0%, #2a5298 100%);
+            color: #fff;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 6px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 1rem;
+            transition: background 0.2s;
+        }
+        .search-btn:hover {
+            background: #2a5298;
+        }
+        .results-section {
+            margin-top: 2rem;
+        }
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 1rem;
+        }
+        .results-actions {
+            display: flex;
+            gap: 1rem;
+        }
+        .export-btn {
+            background: #28a745;
+            color: #fff;
+            border: none;
+            padding: 0.6rem 1.3rem;
+            border-radius: 5px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+        .export-btn:hover {
+            background: #218838;
+        }
+        .results-filter {
+            margin-bottom: 1rem;
+        }
+        .results-table-container {
+            overflow-x: auto;
+            background: #fff;
+            border-radius: 6px;
+            box-shadow: 0 1px 6px rgba(30,60,114,0.05);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.98rem;
+        }
+        th, td {
+            padding: 0.7rem 0.5rem;
+            border-bottom: 1px solid #e3e6ef;
+            text-align: left;
+        }
+        th {
+            background: #f2f5fa;
+            font-weight: 700;
+        }
+        tr:hover {
+            background: #f8fafc;
+        }
+        .api-badge {
+            display: inline-block;
+            padding: 0.2rem 0.7rem;
+            border-radius: 12px;
+            font-size: 0.85em;
+            color: #fff;
+            font-weight: 600;
+        }
+        .api-badge.ted { background: #0066cc; }
+        .api-badge.sam { background: #dc3545; }
+        .footer {
+            text-align: center;
+            color: #888;
+            font-size: 0.95rem;
+            margin: 3rem 0 1rem 0;
+        }
+        @media (max-width: 700px) {
+            main { padding: 1rem; }
+            .form-row { flex-direction: column; }
+            .results-header { flex-direction: column; gap: 1rem; }
+        }
+    </style>
 </head>
 <body>
-    <!-- Header Section -->
-    <header class="header">
-        <div class="container">
-            <h1><i class="fas fa-search"></i> Öffentliche Ausschreibungen</h1>
-            <p>Multi-API Suche für EU, UK und US Aufträge</p>
-        </div>
+    <header>
+        <h1>Öffentliche Ausschreibungen</h1>
+        <p>Suche in TED (EU) und SAM.gov (USA) – Multi-API Plattform</p>
     </header>
-
-    <!-- Search Section -->
-    <section class="search-section">
-        <div class="container">
-            <div class="search-card">
-                <h2>Neue Suche starten</h2>
-                
-                <!-- Search Form -->
-                <form id="searchForm" class="search-form">
-                    <!-- Suchbegriff Input -->
-                    <div class="form-group">
-                        <label for="searchTerm">Suchbegriff:</label>
-                        <input type="text" id="searchTerm" name="searchTerm" required 
-                               placeholder="z.B. IT-Services, Bauarbeiten, Consulting...">
-                    </div>
-
-                    <!-- API Auswahl mit Checkboxen -->
-                    <div class="form-group">
-                        <label>APIs auswählen:</label>
-                        <div class="checkbox-group">
-                            <label class="checkbox-label">
-                                <input type="checkbox" name="apis" value="ted" checked>
-                                <span class="checkmark"></span>
-                                TED-API (EU)
-                            </label>
-                            <label class="checkbox-label">
-                                <input type="checkbox" name="apis" value="openopps" checked>
-                                <span class="checkmark"></span>
-                                OpenOpps (Multi-national)
-                            </label>
-                            <label class="checkbox-label">
-                                <input type="checkbox" name="apis" value="sam" checked>
-                                <span class="checkmark"></span>
-                                SAM.gov (US)
-                            </label>
-                            <label class="checkbox-label">
-                                <input type="checkbox" name="apis" value="contracts_finder" checked>
-                                <span class="checkmark"></span>
-                                Contracts Finder (UK)
-                            </label>
-                        </div>
-                    </div>
-
-                    <!-- Erweiterte Filter -->
-                    <div class="form-group">
-                        <label for="dateFrom">Von Datum:</label>
-                        <input type="date" id="dateFrom" name="dateFrom">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="dateTo">Bis Datum:</label>
-                        <input type="date" id="dateTo" name="dateTo">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="minValue">Mindestauftragswert (EUR):</label>
-                        <input type="number" id="minValue" name="minValue" min="0" step="1000">
-                    </div>
-
-                    <!-- Submit Button -->
-                    <button type="submit" class="search-btn">
-                        <i class="fas fa-search"></i> Suche starten
-                    </button>
-                </form>
-            </div>
-        </div>
-    </section>
-
-    <!-- Status Section -->
-    <section class="status-section" id="statusSection" style="display: none;">
-        <div class="container">
-            <div class="status-card">
-                <h3>Suchstatus</h3>
-                <div id="statusMessage" class="status-message">
-                    <i class="fas fa-spinner fa-spin"></i> Suche wird durchgeführt...
+    <main>
+        <!-- Suchformular -->
+        <form id="searchForm" class="search-form">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="searchTerm">Suchbegriff</label>
+                    <input type="text" id="searchTerm" name="searchTerm" placeholder="z.B. IT-Dienstleistung" required>
                 </div>
-                <div id="progressBar" class="progress-bar">
-                    <div class="progress-fill" style="width: 0%"></div>
+                <div class="form-group">
+                    <label for="dateFrom">Von</label>
+                    <input type="date" id="dateFrom" name="dateFrom">
+                </div>
+                <div class="form-group">
+                    <label for="dateTo">Bis</label>
+                    <input type="date" id="dateTo" name="dateTo">
+                </div>
+                <div class="form-group">
+                    <label for="minValue">Mindestwert (€)</label>
+                    <input type="number" id="minValue" name="minValue" min="0" step="1000">
                 </div>
             </div>
-        </div>
-    </section>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>APIs auswählen</label>
+                    <div class="checkbox-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="apis" value="ted" checked>
+                            TED-API (EU)
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="apis" value="sam" checked>
+                            SAM.gov (US)
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <button class="search-btn" type="submit">Suche starten</button>
+        </form>
 
-    <!-- Results Section -->
-    <section class="results-section" id="resultsSection" style="display: none;">
-        <div class="container">
+        <!-- Ergebnisse -->
+        <section class="results-section" id="resultsSection" style="display:none;">
             <div class="results-header">
-                <h2 id="resultsTitle">Suchergebnisse</h2>
+                <h2>Suchergebnisse</h2>
                 <div class="results-actions">
-                    <button id="exportCsvBtn" class="export-btn">
-                        <i class="fas fa-download"></i> Als CSV exportieren
-                    </button>
-                    <button id="refreshBtn" class="refresh-btn">
-                        <i class="fas fa-sync-alt"></i> Ergebnisse aktualisieren
-                    </button>
+                    <button id="exportCsvBtn" class="export-btn">Als CSV exportieren</button>
                 </div>
             </div>
-
-            <!-- Statistics Cards -->
-            <div class="stats-grid" id="statsGrid">
-                <!-- Wird dynamisch befüllt -->
-            </div>
-
-            <!-- Filter Section für Ergebnisse -->
             <div class="results-filter">
-                <label for="apiFilter">Nach API filtern:</label>
+                <label for="apiFilter">API filtern:</label>
                 <select id="apiFilter">
                     <option value="">Alle APIs</option>
                     <option value="ted">TED-API (EU)</option>
-                    <option value="openopps">OpenOpps</option>
-                    <option value="sam">SAM.gov</option>
-                    <option value="contracts_finder">Contracts Finder</option>
-                </select>
-
-                <label for="sortBy">Sortieren nach:</label>
-                <select id="sortBy">
-                    <option value="date">Datum (neueste zuerst)</option>
-                    <option value="value">Auftragswert</option>
-                    <option value="title">Titel</option>
-                    <option value="deadline">Einreichungsfrist</option>
+                    <option value="sam">SAM.gov (US)</option>
                 </select>
             </div>
-
-            <!-- Results Table -->
             <div class="results-table-container">
-                <table id="resultsTable" class="results-table">
+                <table id="resultsTable">
                     <thead>
                         <tr>
                             <th>API</th>
                             <th>Titel</th>
                             <th>Organisation</th>
-                            <th>Auftragswert</th>
+                            <th>Wert</th>
                             <th>Veröffentlichung</th>
-                            <th>Einreichungsfrist</th>
+                            <th>Frist</th>
                             <th>Land</th>
-                            <th>Aktionen</th>
+                            <th>Link</th>
                         </tr>
                     </thead>
                     <tbody id="resultsTableBody">
-                        <!-- Wird dynamisch befüllt -->
+                        <!-- Ergebnisse werden hier eingefügt -->
                     </tbody>
                 </table>
             </div>
+        </section>
+    </main>
+    <div class="footer">
+        &copy; 2025 Öffentliche Ausschreibungen Suche | Datenquellen: TED, SAM.gov
+    </div>
+    <script>
+        // Einfaches Demo-Skript für die Frontend-Logik (Dummy-Daten)
+        document.getElementById('searchForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            // Hier würdest du normalerweise einen Backend-Call machen oder einen Workflow triggern
+            // Für die Demo werden Dummy-Ergebnisse angezeigt
+            const resultsSection = document.getElementById('resultsSection');
+            const tableBody = document.getElementById('resultsTableBody');
+            resultsSection.style.display = '';
+            tableBody.innerHTML = '';
+            // Dummy-Ergebnisse
+            const dummyResults = [
+                {
+                    api: 'ted',
+                    title: 'IT-Dienstleistungen für Verwaltung',
+                    organization: 'Stadt Berlin',
+                    value: 120000,
+                    currency: 'EUR',
+                    publish_date: '2025-06-01',
+                    deadline: '2025-07-01',
+                    country: 'DE',
+                    url: 'https://ted.europa.eu/udl?uri=TED:NOTICE:123456'
+                },
+                {
+                    api: 'sam',
+                    title: 'Medical Equipment for Hospitals',
+                    organization: 'US Department of Health',
+                    value: 500000,
+                    currency: 'USD',
+                    publish_date: '2025-05-20',
+                    deadline: '2025-06-20',
+                    country: 'US',
+                    url: 'https://sam.gov/opp/abcdef'
+                }
+            ];
+            dummyResults.forEach(result => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><span class="api-badge ${result.api}">${result.api === 'ted' ? 'TED' : 'SAM.gov'}</span></td>
+                    <td>${result.title}</td>
+                    <td>${result.organization}</td>
+                    <td>${result.value.toLocaleString()} ${result.currency}</td>
+                    <td>${result.publish_date}</td>
+                    <td>${result.deadline}</td>
+                    <td>${result.country}</td>
+                    <td><a href="${result.url}" target="_blank">Anzeigen</a></td>
+                `;
+                tableBody.appendChild(row);
+            });
+        });
 
-            <!-- Pagination -->
-            <div class="pagination" id="pagination">
-                <!-- Wird dynamisch befüllt -->
-            </div>
-        </div>
-    </section>
+        // Export als CSV (nur Dummy)
+        document.getElementById('exportCsvBtn').addEventListener('click', function() {
+            const rows = [["API","Titel","Organisation","Wert","Währung","Veröffentlichung","Frist","Land","URL"]];
+            document.querySelectorAll('#resultsTableBody tr').forEach(tr => {
+                const cols = Array.from(tr.children).map(td => td.innerText);
+                rows.push(cols);
+            });
+            const csv = rows.map(r => r.map(x => `"${x.replace(/"/g, '""')}"`).join(',')).join('\n');
+            const blob = new Blob([csv], {type: 'text/csv'});
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'ausschreibungen.csv';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        });
 
-    <!-- Footer -->
-    <footer class="footer">
-        <div class="container">
-            <p>&copy; 2025 Öffentliche Ausschreibungen Suche. Datenquellen: TED, OpenOpps, SAM.gov, Contracts Finder</p>
-        </div>
-    </footer>
-
-    <script src="script.js"></script>
+        // Filter nach API (nur Dummy)
+        document.getElementById('apiFilter').addEventListener('change', function() {
+            const val = this.value;
+            document.querySelectorAll('#resultsTableBody tr').forEach(tr => {
+                if (!val || tr.children[0].innerText.toLowerCase().includes(val)) {
+                    tr.style.display = '';
+                } else {
+                    tr.style.display = 'none';
+                }
+            });
+        });
+    </script>
 </body>
 </html>
