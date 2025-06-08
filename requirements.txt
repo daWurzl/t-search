@@ -1,15 +1,6 @@
-# Python-Abhängigkeiten für die API-Integration
+# Notwendige Python-Pakete
 requests>=2.31.0
 pandas>=2.0.0
 python-dateutil>=2.8.2
-beautifulsoup4>=4.12.0
-lxml>=4.9.0
-openpyxl>=3.1.0
-jsonschema>=4.17.0
-urllib3>=2.0.0
 aiohttp>=3.8.0
-asyncio-mqtt>=0.13.0
-pydantic>=2.0.0
-python-dotenv>=1.0.0
-pytz>=2023.3
-xlsxwriter>=3.1.0
+openpyxl>=3.1.0
